@@ -107,6 +107,17 @@ class Owner:
         """Edit owner information."""
         pass
 
+    def getAllTasks(self, includeCompleted: bool = False) -> List[Task]:
+        """Return tasks across all pets owned by this owner."""
+        allTasks: List[Task] = []
+        for pet in self.pets:
+            allTasks.extend(pet.getTasks(includeCompleted=includeCompleted))
+        return allTasks
+
+    def getDueTasks(self) -> List[Task]:
+        """Return due tasks across all pets (currently modeled as incomplete tasks)."""
+        return self.getAllTasks(includeCompleted=False)
+
 
 class Scheduler:
     """Orchestrates mutable task scheduling for a single-day plan."""
@@ -115,9 +126,9 @@ class Scheduler:
         self.scheduledTasks = scheduledTasks or {}
 
     def generateDailyPlan(
-        self, owner: Owner, pets: List[Pet], tasks: List[Task]
+        self, owner: Owner, date: Optional[str] = None
     ) -> Dict[Task, TimeWindow]:
-        """Generate/update a daily schedule based on owner preferences, pet needs, and tasks."""
+        """Generate/update a daily schedule by retrieving cross-pet tasks from the owner."""
         pass
 
     def explainPlan(self, plan: Dict[Task, TimeWindow]) -> str:
