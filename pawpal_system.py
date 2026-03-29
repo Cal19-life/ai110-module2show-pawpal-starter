@@ -25,6 +25,7 @@ class Task:
     notes: str
     description: Optional[str] = None
     preferredTimeWindow: Optional[TimeWindow] = None
+    scheduledTimeWindow: Optional[TimeWindow] = None
     frequency: Tuple[int, int] = (1, 1)
     completed: bool = False
     completedAt: Optional[str] = None
@@ -53,6 +54,14 @@ class Task:
         """Mark a task as not completed and clear completion metadata."""
         self.completed = False
         self.completedAt = None
+
+    def updatePreferredTime(self, timeWindow: Optional[TimeWindow]) -> None:
+        """Update the preferred time window for this task."""
+        self.preferredTimeWindow = timeWindow
+
+    def updateScheduledTime(self, timeWindow: Optional[TimeWindow]) -> None:
+        """Update the scheduled time window for this task."""
+        self.scheduledTimeWindow = timeWindow
 
 
 @dataclass
