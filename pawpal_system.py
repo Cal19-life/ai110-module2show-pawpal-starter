@@ -4,7 +4,7 @@ Classes and stubs for pet care task scheduling application
 """
 
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 @dataclass
@@ -23,6 +23,8 @@ class Task:
     durationMin: int
     priority: int
     notes: str
+    completed: bool = False
+    completedAt: Optional[str] = None
     isWalking: bool = False
     isFeeding: bool = False
     isMedication: bool = False
@@ -32,6 +34,16 @@ class Task:
     def editTask(self) -> None:
         """Edit an existing task."""
         pass
+
+    def markComplete(self, completedAt: Optional[str] = None) -> None:
+        """Mark a task as completed, optionally with a completion timestamp."""
+        self.completed = True
+        self.completedAt = completedAt
+
+    def markIncomplete(self) -> None:
+        """Mark a task as not completed and clear completion metadata."""
+        self.completed = False
+        self.completedAt = None
 
 
 @dataclass
