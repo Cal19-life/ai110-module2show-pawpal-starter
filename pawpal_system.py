@@ -3,7 +3,7 @@ PawPal+ System Design
 Classes and stubs for pet care task scheduling application
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
 
@@ -73,12 +73,7 @@ class Pet:
     feedingNeedLevel: int
     medNeedLevel: int
     groomingNeedLevel: int
-    tasks: List[Task] = None
-
-    def __post_init__(self) -> None:
-        """Ensure each pet has its own task list by default."""
-        if self.tasks is None:
-            self.tasks = []
+    tasks: List[Task] = field(default_factory=list)
 
     def updatePetInfo(self) -> None:
         """Update pet information."""
@@ -100,22 +95,14 @@ class Pet:
         return [task for task in self.tasks if not task.completed]
 
 
+@dataclass
 class Owner:
     """Represents a pet owner with preferences and availability."""
-
-    def __init__(
-        self,
-        name: str,
-        preferences: List[str] = None,
-        availabilities: List[TimeWindow] = None,
-        notAvailable: List[TimeWindow] = None,
-        pets: List[Pet] = None,
-    ):
-        self.name = name
-        self.preferences = preferences or []
-        self.availabilities = availabilities or []
-        self.notAvailable = notAvailable or []
-        self.pets = pets or []
+    name: str
+    preferences: List[str] = field(default_factory=list)
+    availabilities: List[TimeWindow] = field(default_factory=list)
+    notAvailable: List[TimeWindow] = field(default_factory=list)
+    pets: List[Pet] = field(default_factory=list)
 
     def createOwner(self) -> None:
         """Create a new owner record."""
