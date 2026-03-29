@@ -4,7 +4,7 @@ Classes and stubs for pet care task scheduling application
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 
 @dataclass
@@ -23,6 +23,9 @@ class Task:
     durationMin: int
     priority: int
     notes: str
+    description: Optional[str] = None
+    preferredTimeWindow: Optional[TimeWindow] = None
+    frequency: Tuple[int, int] = (1, 1)
     completed: bool = False
     completedAt: Optional[str] = None
     isWalking: bool = False
@@ -30,6 +33,12 @@ class Task:
     isMedication: bool = False
     isEnrichment: bool = False
     isGrooming: bool = False
+
+    def __post_init__(self) -> None:
+        """Validate frequency tuple on task initialization."""
+        count, days = self.frequency
+        if count < 0 or days <= 0:
+            raise ValueError(f"frequency must be (count >= 0, days > 0), got {self.frequency}")
 
     def editTask(self) -> None:
         """Edit an existing task."""
