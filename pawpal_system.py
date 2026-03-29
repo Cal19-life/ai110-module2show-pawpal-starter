@@ -55,10 +55,31 @@ class Pet:
     feedingNeedLevel: int
     medNeedLevel: int
     groomingNeedLevel: int
+    tasks: List[Task] = None
+
+    def __post_init__(self) -> None:
+        """Ensure each pet has its own task list by default."""
+        if self.tasks is None:
+            self.tasks = []
 
     def updatePetInfo(self) -> None:
         """Update pet information."""
         pass
+
+    def addTask(self, task: Task) -> None:
+        """Add a task to this pet's task list."""
+        self.tasks.append(task)
+
+    def removeTask(self, task: Task) -> None:
+        """Remove a task from this pet's task list if present."""
+        if task in self.tasks:
+            self.tasks.remove(task)
+
+    def getTasks(self, includeCompleted: bool = False) -> List[Task]: #Unsure why I'd need to return tasks, but still helpful boilerplate code to write if I do 
+        """Return this pet's tasks, optionally including completed tasks."""
+        if includeCompleted:
+            return list(self.tasks)
+        return [task for task in self.tasks if not task.completed]
 
 
 class Owner:
