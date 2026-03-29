@@ -4,7 +4,7 @@ Classes and stubs for pet care task scheduling application
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Optional
+from typing import Dict, List
 
 
 @dataclass
@@ -23,10 +23,11 @@ class Task:
     durationMin: int
     priority: int
     notes: str
-
-    def createTask(self) -> None:
-        """Create a new task."""
-        pass
+    isWalking: bool = False
+    isFeeding: bool = False
+    isMedication: bool = False
+    isEnrichment: bool = False
+    isGrooming: bool = False
 
     def editTask(self) -> None:
         """Edit an existing task."""
@@ -34,39 +35,10 @@ class Task:
 
 
 @dataclass
-class WalkingTask(Task):
-    """Walking-specific task subclass."""
-    pass
-
-
-@dataclass
-class FeedingTask(Task):
-    """Feeding-specific task subclass."""
-    pass
-
-
-@dataclass
-class MedicationTask(Task):
-    """Medication-specific task subclass."""
-    pass
-
-
-@dataclass
-class EnrichmentTask(Task):
-    """Enrichment-specific task subclass."""
-    pass
-
-
-@dataclass
-class GroomingTask(Task):
-    """Grooming-specific task subclass."""
-    pass
-
-
-@dataclass
 class Pet:
     """Represents a pet with care needs."""
     name: str
+    owner: "Owner"
     walkNeedLevel: int
     feedingNeedLevel: int
     medNeedLevel: int
@@ -103,27 +75,19 @@ class Owner:
         pass
 
 
-class DailyPlan:
-    """Represents a daily schedule of tasks with assigned time windows."""
+class Scheduler:
+    """Orchestrates mutable task scheduling for a single-day plan."""
 
     def __init__(self, scheduledTasks: Dict[Task, TimeWindow] = None):
         self.scheduledTasks = scheduledTasks or {}
 
-    def getDailyPlan(self) -> Dict[Task, TimeWindow]:
-        """Retrieve the daily plan as a dictionary of tasks to time windows."""
-        pass
-
-
-class Scheduler:
-    """Orchestrates daily plan generation and task scheduling."""
-
     def generateDailyPlan(
         self, owner: Owner, pets: List[Pet], tasks: List[Task]
-    ) -> DailyPlan:
-        """Generate a daily plan based on owner preferences, pet needs, and available tasks."""
+    ) -> Dict[Task, TimeWindow]:
+        """Generate/update a daily schedule based on owner preferences, pet needs, and tasks."""
         pass
 
-    def explainPlan(self, plan: DailyPlan) -> str:
+    def explainPlan(self, plan: Dict[Task, TimeWindow]) -> str:
         """Provide explanation/reasoning for the generated plan."""
         pass
 
