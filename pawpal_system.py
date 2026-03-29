@@ -19,8 +19,8 @@ class TimeWindow:
 class Task:
     """Base task class representing a pet care activity."""
     title: str
-    type: str
-    durationMin: int
+    type: str #TODO del later, redundant with isType boolean flags
+    durationMin: int #TODO del later, redundant since saving scheduledTimeWindow
     priority: int
     notes: str
     description: Optional[str] = None
@@ -127,8 +127,8 @@ class Owner:
 class Scheduler:
     """Orchestrates mutable task scheduling for a single-day plan."""
 
-    def __init__(self, scheduledTasks: Dict[Task, TimeWindow] = None):
-        self.scheduledTasks = scheduledTasks or {}
+    def __init__(self, scheduledTasks: List[Task] = None):
+        self.scheduledTasks = scheduledTasks or []
 
     def generateDailyPlan(
         self, owner: Owner, date: Optional[str] = None
@@ -142,12 +142,18 @@ class Scheduler:
 
     def addScheduledTask(self, task: Task, timewindow: TimeWindow) -> None:
         """Add a task to the schedule at a specific time window."""
-        pass
+        task.updateScheduledTime(timewindow)
+        if task not in self.scheduledTasks:
+            self.scheduledTasks.append(task)
 
     def removeScheduledTask(self, task: Task) -> None:
         """Remove a task from the schedule."""
-        pass
+        if task in self.scheduledTasks:
+            self.scheduledTasks.remove(task)
+        task.updateScheduledTime(None)
 
     def rescheduleTaskTime(self, task: Task, timewindow: TimeWindow) -> None:
         """Reschedule a task to a new time window."""
-        pass
+        if task not in self.scheduledTasks:
+            self.scheduledTasks.append(task)
+        task.updateScheduledTime(timewindow)
