@@ -4,6 +4,7 @@ Classes and stubs for pet care task scheduling application
 """
 
 from dataclasses import dataclass, field
+from datetime import time
 from typing import Dict, List, Optional, Tuple
 
 
@@ -11,8 +12,8 @@ from typing import Dict, List, Optional, Tuple
 class TimeWindow:
     """Represents a time window with day of week and start/end times."""
     dayOfWeek: int
-    startTime: str
-    endTime: str
+    startTime: time
+    endTime: time
 
 
 @dataclass
@@ -63,6 +64,18 @@ class Task:
         """Update the scheduled time window for this task."""
         self.scheduledTimeWindow = timeWindow
 
+    def setPriority(self, priority: int) -> None:
+        """Set task priority with basic validation."""
+        if priority < 0:
+            raise ValueError("priority must be >= 0")
+        self.priority = priority
+
+    def setDurationMin(self, minutes: int) -> None:
+        """Set task duration in minutes with basic validation."""
+        if minutes <= 0:
+            raise ValueError("durationMin must be > 0")
+        self.durationMin = minutes
+
 
 @dataclass
 class Pet:
@@ -94,6 +107,35 @@ class Pet:
             return list(self.tasks)
         return [task for task in self.tasks if not task.completed]
 
+    def getTasksByType(self, taskType: str, includeCompleted: bool = False) -> List[Task]:
+        """Return tasks matching a task type, using flags first and type string as fallback."""
+        normalizedType = taskType.strip().lower()
+
+        flagByType = {
+            "walk": "isWalking",
+            "walking": "isWalking",
+            "feed": "isFeeding",
+            "feeding": "isFeeding",
+            "med": "isMedication",
+            "medication": "isMedication",
+            "medicine": "isMedication",
+            "enrichment": "isEnrichment",
+            "groom": "isGrooming",
+            "grooming": "isGrooming",
+        }
+        flagName = flagByType.get(normalizedType)
+
+        candidateTasks = self.tasks if includeCompleted else [task for task in self.tasks if not task.completed]
+
+        matched: List[Task] = []
+        for task in candidateTasks:
+            hasFlagMatch = flagName is not None and getattr(task, flagName, False)
+            hasTypeFallbackMatch = task.type.strip().lower() == normalizedType
+            if hasFlagMatch or hasTypeFallbackMatch:
+                matched.append(task)
+
+        return matched
+
 
 @dataclass
 class Owner:
@@ -122,6 +164,48 @@ class Owner:
     def getDueTasks(self) -> List[Task]:
         """Return due tasks across all pets (currently modeled as incomplete tasks)."""
         return self.getAllTasks(includeCompleted=False)
+
+    def getPets(self) -> List[Pet]:
+        """Return all pets associated with this owner."""
+        return list(self.pets)
+
+    def addPet(self, pet: Pet) -> None:
+        """Add a pet to this owner if not already present."""
+        if pet not in self.pets:
+            self.pets.append(pet)
+        pet.owner = self
+
+    def removePet(self, petOrName: object) -> None:
+        """Remove a pet by object or pet name."""
+        if isinstance(petOrName, Pet):
+            if petOrName in self.pets:
+                self.pets.remove(petOrName)
+            return
+
+        if isinstance(petOrName, str):
+            pet = self.getPetByName(petOrName)
+            if pet is not None:
+                self.pets.remove(pet)
+            return
+
+        raise TypeError("removePet expects a Pet instance or pet name string")
+
+    def getPetByName(self, name: str) -> Optional[Pet]:
+        """Return the first pet with a matching name, if any.
+        Only looks for exact matches. Returns the first match found. 
+        Returns None if no match is found."""
+        for pet in self.pets:
+            if pet.name == name:
+                return pet
+        return None
+
+    def addAvailability(self, timeWindow: TimeWindow) -> None:
+        """Add an available time window for this owner."""
+        self.availabilities.append(timeWindow)
+
+    def addNotAvailable(self, timeWindow: TimeWindow) -> None:
+        """Add an unavailable time window for this owner."""
+        self.notAvailable.append(timeWindow)
 
 
 class Scheduler:
@@ -157,3 +241,7 @@ class Scheduler:
         if task not in self.scheduledTasks:
             self.scheduledTasks.append(task)
         task.updateScheduledTime(timewindow)
+
+    def getScheduledTasks(self) -> List[Task]:
+        """Return currently scheduled tasks."""
+        return list(self.scheduledTasks)
