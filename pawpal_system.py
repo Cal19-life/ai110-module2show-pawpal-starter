@@ -212,6 +212,7 @@ class Scheduler:
     """Orchestrates mutable task scheduling for a single-day plan."""
 
     def __init__(self, scheduledTasks: List[Task] = None):
+        """Initialize the scheduler with an optional scheduled task list or an empty list by default."""
         self.scheduledTasks = scheduledTasks or []
 
     def generateDailyPlan(
