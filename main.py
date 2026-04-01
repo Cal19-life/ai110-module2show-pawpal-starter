@@ -97,7 +97,7 @@ tasks_list = [
 scheduler = pawpal_system.Scheduler()
 
 for task in tasks_list:
-    scheduler.addScheduledTask(task, task.preferredTimeWindow) 
+    scheduler.addTasktoSchedule(task, task.preferredTimeWindow) 
 
 scheduler.generateDailyPlan(owner=test_owner_0)
 

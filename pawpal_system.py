@@ -224,7 +224,7 @@ class Scheduler:
         """Provide explanation/reasoning for the generated plan."""
         pass
 
-    def addScheduledTask(self, task: Task, timewindow: TimeWindow) -> None:
+    def addTasktoSchedule(self, task: Task, timewindow: TimeWindow) -> None:
         """Add a task to the schedule at a specific time window."""
         if task not in self.scheduledTasks:
             task._updateScheduledTime(timewindow) # so we don't update the timewindow if in scheduledTasks already

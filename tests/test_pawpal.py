@@ -217,7 +217,7 @@ def test_scheduler_add_remove_reschedule_and_get_scheduled_tasks() -> None:
 	slot_a = make_window(day=0, start_hour=7, end_hour=8)
 	slot_b = make_window(day=0, start_hour=10, end_hour=11)
 
-	scheduler.addScheduledTask(task, slot_a)
+	scheduler.addTasktoSchedule(task, slot_a)
 	assert scheduler.getScheduledTasks() == [task]
 	assert task.scheduledTimeWindow == slot_a
 
@@ -236,8 +236,8 @@ def test_scheduler_add_does_not_overwrite_existing_scheduled_time() -> None:
 	slot_a = make_window(day=0, start_hour=8, end_hour=9)
 	slot_b = make_window(day=0, start_hour=9, end_hour=10)
 
-	scheduler.addScheduledTask(task, slot_a)
-	scheduler.addScheduledTask(task, slot_b)
+	scheduler.addTasktoSchedule(task, slot_a)
+	scheduler.addTasktoSchedule(task, slot_b)
 
 	assert scheduler.getScheduledTasks() == [task]
 	assert task.scheduledTimeWindow == slot_a
