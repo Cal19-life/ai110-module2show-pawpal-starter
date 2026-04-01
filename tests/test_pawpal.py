@@ -1,4 +1,4 @@
-from datetime import time
+from datetime import date, time
 from pathlib import Path
 import sys
 
@@ -21,6 +21,7 @@ def make_task(
 	title: str = "Task",
 	task_type: str = "walk",
 	frequency: tuple[int, int] = (1, 1),
+	recurrence_start_date: date = date(2026, 1, 1),
 	completed: bool = False,
 	priority: int = 1,
 	is_walking: bool = False,
@@ -37,6 +38,7 @@ def make_task(
 		notes="sample",
 		preferredTimeWindow=make_window(),
 		frequency=frequency,
+		recurrenceStartDate=recurrence_start_date,
 		isWalking=is_walking,
 		isFeeding=is_feeding,
 		isMedication=is_medication,
@@ -264,3 +266,66 @@ def test_scheduler_remove_unscheduled_task_with_no_window_is_safe() -> None:
 
 	assert scheduler.getScheduledTasks() == []
 	assert task.scheduledTimeWindow is None
+
+
+def test_scheduler_auto_add_recurring_tasks_for_matching_weekday() -> None:
+	owner, pet = make_owner_and_pet()
+	scheduler = pawpal_system.Scheduler()
+	day = date(2026, 1, 5)  # Monday
+
+	weekly_walk = make_task(
+		title="Weekly Walk",
+		frequency=(1, 7),
+		is_walking=True,
+	)
+	weekly_walk.updatePreferredTime(make_window(day=0, start_hour=8, end_hour=9))
+	pet.addTask(weekly_walk)
+
+	due = scheduler.autoAddRecurringTasksForDate(owner, day)
+
+	assert due == [weekly_walk]
+	assert scheduler.getScheduledTasks() == [weekly_walk]
+	assert weekly_walk.scheduledTimeWindow is not None
+	assert weekly_walk.scheduledTimeWindow.dayOfWeek == 0
+
+
+def test_scheduler_does_not_schedule_recurring_task_on_wrong_weekday() -> None:
+	owner, pet = make_owner_and_pet()
+	scheduler = pawpal_system.Scheduler()
+	day = date(2026, 1, 6)  # Tuesday
+
+	weekly_walk = make_task(title="Weekly Walk", frequency=(1, 7), is_walking=True)
+	weekly_walk.updatePreferredTime(make_window(day=0, start_hour=8, end_hour=9))
+	pet.addTask(weekly_walk)
+
+	due = scheduler.autoAddRecurringTasksForDate(owner, day)
+
+	assert due == []
+	assert scheduler.getScheduledTasks() == []
+
+
+def test_scheduler_recurring_count_limit_and_cycle_reset() -> None:
+	owner, pet = make_owner_and_pet()
+	scheduler = pawpal_system.Scheduler()
+	day_1 = date(2026, 1, 5)   # Monday
+	day_8 = date(2026, 1, 12)  # Next Monday
+
+	task = make_task(title="Meds", frequency=(1, 7), is_medication=True)
+	task.updatePreferredTime(make_window(day=0, start_hour=8, end_hour=9))
+	pet.addTask(task)
+
+	first_cycle_due = scheduler.autoAddRecurringTasksForDate(owner, day_1)
+	assert first_cycle_due == [task]
+
+	scheduler.markTaskCompleteForDate(task, day_1, completedAt="2026-03-31T08:00")
+	assert task.completedCountInCycle == 1
+	assert task.completionDayNumbers == [day_1.toordinal()]
+
+	same_cycle_due = scheduler.autoAddRecurringTasksForDate(owner, day_1)
+	assert same_cycle_due == []
+
+	next_cycle_due = scheduler.autoAddRecurringTasksForDate(owner, day_8)
+	assert next_cycle_due == [task]
+	assert task.completedCountInCycle == 0
+	assert task.completionDayNumbers == []
+	assert task.completed is False
