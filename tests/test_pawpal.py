@@ -118,7 +118,9 @@ def test_pet_add_remove_and_get_tasks_filters_completed() -> None:
 	walk = make_task(title="Walk", task_type="walk")
 	feed = make_task(title="Feed", task_type="feeding", completed=True)
 
+	initial_count = len(pet.tasks)
 	pet.addTask(walk)
+	assert len(pet.tasks) == initial_count + 1
 	pet.addTask(feed)
 
 	assert pet.getTasks() == [walk]
