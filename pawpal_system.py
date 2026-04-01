@@ -60,8 +60,8 @@ class Task:
         """Update the preferred time window for this task."""
         self.preferredTimeWindow = timeWindow
 
-    def updateScheduledTime(self, timeWindow: Optional[TimeWindow]) -> None:
-        """Update the scheduled time window for this task."""
+    def _updateScheduledTime(self, timeWindow: Optional[TimeWindow]) -> None:
+        """Internal: Scheduler-owned mutation for scheduled task window."""
         self.scheduledTimeWindow = timeWindow
 
     def setPriority(self, priority: int) -> None:
@@ -226,21 +226,21 @@ class Scheduler:
 
     def addScheduledTask(self, task: Task, timewindow: TimeWindow) -> None:
         """Add a task to the schedule at a specific time window."""
-        task.updateScheduledTime(timewindow)
         if task not in self.scheduledTasks:
+            task._updateScheduledTime(timewindow) # so we don't update the timewindow if in scheduledTasks already
             self.scheduledTasks.append(task)
 
     def removeScheduledTask(self, task: Task) -> None:
         """Remove a task from the schedule."""
         if task in self.scheduledTasks:
             self.scheduledTasks.remove(task)
-        task.updateScheduledTime(None)
+        task._updateScheduledTime(None)
 
     def rescheduleTaskTime(self, task: Task, timewindow: TimeWindow) -> None:
         """Reschedule a task to a new time window."""
         if task not in self.scheduledTasks:
             self.scheduledTasks.append(task)
-        task.updateScheduledTime(timewindow)
+        task._updateScheduledTime(timewindow)
 
     def getScheduledTasks(self) -> List[Task]:
         """Return currently scheduled tasks."""
